@@ -2,10 +2,7 @@
 linear regression with a single feature - the mileage of the car.
 '''
 import csv
-
-def estimate_price(mileage, theta):
-    'predict the price of a car for a given mileage'
-    return theta[0] + (theta[1] * mileage)
+import estimate as e
 
 #def cost_function(x, y, m, t):
 #    est = [0] * m
@@ -46,7 +43,7 @@ def train_model(mileage, price, m, learning_rate):
     while change[0] != change[1]:
         change[0] = change[1]
         for i in range(m):
-            est[0][i] = estimate_price(n_mileage[i], theta) - n_price[i]
+            est[0][i] = e.estimate_price(n_mileage[i], theta) - n_price[i]
             est[1][i] = est[0][i] * n_mileage[i]
         tmp[0] = learning_rate * (sum(est[0])/m)
         tmp[1] = learning_rate * (sum(est[1])/m)
@@ -56,17 +53,23 @@ def train_model(mileage, price, m, learning_rate):
     #print("cost: ", cost_function(mileage, price, m, theta))
     return theta, sum(mileage)/m, sum(price)/m
 
+def process():
+    try:
+        with open("data.csv") as file:
+            data = csv.reader(file)
+            next(data) # to cut the table's header
+            mileage, price, lines_nb = get_data(data)
+        theta, average_m, average_p = train_model(mileage, price, lines_nb, 0.1)
+        with open("results.csv", 'w+') as res:
+            writer = csv.writer(res)
+            writer.writerow(theta)
+            writer.writerow([average_m, average_p])
+            writer.writerow([(max(mileage) - min(mileage)), (max(price) - min(price))])
+        return 1
+    except IOError:
+        print('''Couldn't find "data.csv" file to train the model''')
+        return 0
+
 if __name__ == "__main__":
-    #print("What mileage to check?")
-    #MILEAGE_TO_CHECK = int(input())
-    MILEAGE_TO_CHECK = 73000
-    FILE = open("data.csv", "r")
-    DATA = csv.reader(FILE)
-    next(DATA) # to cut the table's header
-    MILEAGE, PRICE, LINES_NB = get_data(DATA)
-    FILE.close()
-    THETA, AVERAGE_M, AVERAGE_P = train_model(MILEAGE, PRICE, LINES_NB, 0.1)
-    NORMALIZED_MILEAGE = (MILEAGE_TO_CHECK - AVERAGE_M) / (max(MILEAGE) - min(MILEAGE))
-    NORMALIZED_PRICE = estimate_price((NORMALIZED_MILEAGE), THETA)
-    PRICE_ESTIMATE = (max(PRICE) - min(PRICE)) * NORMALIZED_PRICE + AVERAGE_P
-    print("\nHere is your price estimate: ", int(PRICE_ESTIMATE), '\n')
+    if process() == 1:
+        print("Training successful")
