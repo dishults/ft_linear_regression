@@ -2,6 +2,8 @@
 linear regression with a single feature - the mileage of the car.
 '''
 import csv
+import sys
+
 MILEAGE = 0
 PRICE = 1
 
@@ -20,9 +22,6 @@ def process(mileage_to_check):
             average = float(line[0]), float(line[1])
             line = next(data)
             max_minus_min = int(line[0]), int(line[1])
-            #print(theta[0], theta[1])
-            #print(average[MILEAGE], average[PRICE])
-            #print(max_minus_min[MILEAGE], max_minus_min[PRICE])
             normalized_mileage = (mileage_to_check - average[MILEAGE]) / max_minus_min[MILEAGE]
             normalized_price = estimate_price((normalized_mileage), theta)
             price_estimate = max_minus_min[PRICE] * normalized_price + average[PRICE]
@@ -34,11 +33,18 @@ def process(mileage_to_check):
 def get_mileage_to_check():
     "Get a positive mileage from user to estimate the price"
     mileage = -1
-    while mileage < 0:
-        print("What mileage to check?")
-        mileage = int(input())
-        if mileage < 0:
+    print("What mileage to check?")
+    while True:
+        try:
+            mileage = int(input())
+            assert mileage >= 0
+            break
+        except ValueError:
+            print("Enter a valid number")
+        except AssertionError:
             print("Value is negative, try again with a positive number")
+        except KeyboardInterrupt:
+            sys.exit("\nStopped by the user")
     return mileage
 
 if __name__ == "__main__":

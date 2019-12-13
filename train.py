@@ -28,12 +28,13 @@ def get_data(data):
     for row in data:
         mileage.append(int(row[0]))
         price.append(int(row[1]))
+        if (len(row) != 2):
+            raise IndexError('Too many columns')
     m = data.line_num - 1
     return mileage, price, m
 
 def train_model(mileage, price, m, learning_rate):
-    '''using gradient descent algorithm
-    Read dataset file and perform a linear regression on the data.'''
+    '''using a linear function with a gradient descent algorithm'''
     theta = [0, 0]
     tmp = [0, 0]
     n_mileage = normalize_data(mileage, m)
@@ -54,22 +55,35 @@ def train_model(mileage, price, m, learning_rate):
     return theta, sum(mileage)/m, sum(price)/m
 
 def process():
-    try:
-        with open("data.csv") as file:
-            data = csv.reader(file)
-            next(data) # to cut the table's header
-            mileage, price, lines_nb = get_data(data)
-        theta, average_m, average_p = train_model(mileage, price, lines_nb, 0.1)
-        with open("results.csv", 'w+') as res:
-            writer = csv.writer(res)
-            writer.writerow(theta)
-            writer.writerow([average_m, average_p])
-            writer.writerow([(max(mileage) - min(mileage)), (max(price) - min(price))])
-        return 1
-    except IOError:
-        print('''Couldn't find "data.csv" file to train the model''')
-        return 0
+    with open("data.csv") as file:
+        data = csv.reader(file)
+        header = next(data)
+        assert len(header) == 2
+        assert not any(cell.isdigit() for cell in header)
+        mileage, price, lines_nb = get_data(data)
+    theta, average_m, average_p = train_model(mileage, price, lines_nb, 0.1)
+    with open("results.csv", 'w+') as res:
+        writer = csv.writer(res)
+        writer.writerow(theta)
+        writer.writerow([average_m, average_p])
+        writer.writerow([(max(mileage) - min(mileage)), (max(price) - min(price))])
 
 if __name__ == "__main__":
-    if process() == 1:
+    try:
+        process()
         print("Training successful")
+    except IOError as ex:
+        print((type(ex).__name__))
+        print('''Couldn't find "data.csv" file to train the model''')
+    except (IndexError, ValueError) as ex:
+        print(f"Exception {type(ex).__name__} has occured with msg:\n{ex}\n")
+        print('''Double check that your "data.csv" file is correct''')
+        print("- First line is a header: km,price")
+        print("- All other lines are positive integers, two per line")
+        print("- No empty new lines at the end or just one")
+        print("- No other funky stuff. Just data, pure data")
+    except (ZeroDivisionError, StopIteration) as ex:
+        print('''File "data.csv" must have at least three lines''')
+    except AssertionError as ex:
+        print('''Incorrect header for "data.csv" file''')
+        print("Your file should have a header with two values, ex:\nkm,price")
