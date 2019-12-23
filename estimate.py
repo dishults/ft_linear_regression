@@ -1,5 +1,5 @@
 '''
-linear regression with a single feature - the mileage of the car.
+Estimate price of the car for the given mileage
 '''
 import csv
 import sys
@@ -31,8 +31,7 @@ def process(mileage_to_check):
     return price_estimate
 
 def get_mileage_to_check():
-    "Get a positive mileage from user to estimate the price"
-    mileage = -1
+    'Get a positive mileage from user to estimate the price'
     print("What mileage to check?")
     while True:
         try:

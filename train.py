@@ -1,15 +1,9 @@
 '''
-linear regression with a single feature - the mileage of the car.
+Train model
 '''
 import csv
 import estimate as e
-
-#def cost_function(x, y, m, t):
-#    est = [0] * m
-#    for i in range(m):
-#        est[i] = (estimate_price(x[i], t) - y[i])**2
-#    cost = sum(est)/(2 * m)
-#    return cost
+import bonus as b
 
 def normalize_data(data, m):
     '''through Feature Scaling (dividing by "max-min")
@@ -28,7 +22,7 @@ def get_data(data):
     for row in data:
         mileage.append(int(row[0]))
         price.append(int(row[1]))
-        if (len(row) != 2):
+        if len(row) != 2:
             raise IndexError('Too many columns')
     m = data.line_num - 1
     return mileage, price, m
@@ -51,10 +45,16 @@ def train_model(mileage, price, m, learning_rate):
         change[1] = (abs(tmp[0] - theta[0]) + abs(tmp[1] + theta[1])) / 2
         theta[0] -= tmp[0]
         theta[1] -= tmp[1]
-    #print("cost: ", cost_function(mileage, price, m, theta))
+    print(f'''Training successful.\n
+    Algorithm precision (less is better, 0 is best):"\n
+    - with default thetas [0, 0]:
+    \t{b.cost_function(n_mileage, n_price, m, [0, 0])}\n
+    - with trained thetas {theta}:
+    \t{b.cost_function(n_mileage, n_price, m, theta)}\n''')
     return theta, sum(mileage)/m, sum(price)/m
 
 def process():
+    'Read data file -> train model on it -> store the results'
     with open("data.csv") as file:
         data = csv.reader(file)
         header = next(data)
@@ -71,7 +71,6 @@ def process():
 if __name__ == "__main__":
     try:
         process()
-        print("Training successful")
     except IOError as ex:
         print((type(ex).__name__))
         print('''Couldn't find "data.csv" file to train the model''')
