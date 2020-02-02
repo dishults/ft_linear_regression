@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 '''
 Estimate price of the car for the given mileage
 '''
+import os
 import csv
 import sys
 
@@ -33,20 +35,37 @@ def process(mileage_to_check):
 def get_mileage_to_check():
     'Get a positive mileage from user to estimate the price'
     print("What mileage to check?")
+    args = sys.argv
+    if len(args) == 2:
+        mileage = args[1]
+        print(mileage)
     while True:
         try:
-            mileage = int(input())
+            if 'mileage' not in locals():
+                mileage = input()
+            mileage = int(mileage)
             assert mileage >= 0
             break
         except ValueError:
             print("Enter a valid number")
+            del mileage
         except AssertionError:
             print("Value is negative, try again with a positive number")
+            del mileage
         except KeyboardInterrupt:
             sys.exit("\nStopped by the user")
     return mileage
 
+def dir_check():
+    '''Checks that you're trying to launch your program from
+    ft_linear_regression directory'''
+    cwd = os.getcwd()
+    dirr = os.path.basename(cwd)
+    if dirr != 'ft_linear_regression':
+        sys.exit('Error: make sure you are in "ft_linear_regression" directory')
+
 if __name__ == "__main__":
+    dir_check()
     MILEAGE_TO_CHECK = get_mileage_to_check()
     RESULT = int(process(MILEAGE_TO_CHECK))
     if RESULT <= 0:

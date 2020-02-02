@@ -1,7 +1,9 @@
+#!/usr/bin/env python3
 '''
 Train model
 '''
 import csv
+
 import estimate as e
 import bonus as b
 
@@ -67,13 +69,17 @@ def process():
         writer.writerow(theta)
         writer.writerow([average_m, average_p])
         writer.writerow([(max(mileage) - min(mileage)), (max(price) - min(price))])
+    b.plot(mileage, price, lines_nb)
 
 if __name__ == "__main__":
+    e.dir_check()
     try:
         process()
     except IOError as ex:
         print((type(ex).__name__))
-        print('''Couldn't find "data.csv" file to train the model''')
+        print('''Couldn't find "data.csv" file to train the model.''')
+        print('''Make sure "data.csv" is in the same folder with your''')
+        print('''training program and you launch it from that folder''')
     except (IndexError, ValueError) as ex:
         print(f"Exception {type(ex).__name__} has occured with msg:\n{ex}\n")
         print('''Double check that your "data.csv" file is correct''')
