@@ -30,28 +30,22 @@ def process(mileage_to_check):
     except IOError:
         theta = [0, 0]
         price_estimate = estimate_price(mileage_to_check, theta)
+    if price_estimate < 0:
+        price_estimate = 0
     return price_estimate
 
 def get_mileage_to_check():
     'Get a positive mileage from user to estimate the price'
     print("What mileage to check?")
-    args = sys.argv
-    if len(args) == 2:
-        mileage = args[1]
-        print(mileage)
     while True:
         try:
-            if 'mileage' not in locals():
-                mileage = input()
-            mileage = int(mileage)
+            mileage = int(input())
             assert mileage >= 0
             break
         except ValueError:
-            print("Enter a valid number")
-            del mileage
+            print("Enter a valid number or hit Ctrl+C to exit")
         except AssertionError:
             print("Value is negative, try again with a positive number")
-            del mileage
         except KeyboardInterrupt:
             sys.exit("\nStopped by the user")
     return mileage
@@ -66,10 +60,14 @@ def dir_check():
 
 if __name__ == "__main__":
     dir_check()
-    MILEAGE_TO_CHECK = get_mileage_to_check()
-    RESULT = int(process(MILEAGE_TO_CHECK))
-    if RESULT <= 0:
-        print("\nThe estimate is that your car isn't worth anything.")
-        print("Keep using it or recycle and get a new one.")
+    if len(sys.argv) > 1:
+        for arg in sys.argv:
+            if not arg.isdigit():
+                continue
+            MILEAGE_TO_CHECK = int(arg)
+            RESULT = int(process(MILEAGE_TO_CHECK))
+            print(f"\nFor mileage {MILEAGE_TO_CHECK} price estimate is: {RESULT}")
     else:
+        MILEAGE_TO_CHECK = get_mileage_to_check()
+        RESULT = int(process(MILEAGE_TO_CHECK))
         print("\nHere is your price estimate: ", RESULT)

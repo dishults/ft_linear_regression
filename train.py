@@ -47,12 +47,12 @@ def train_model(mileage, price, m, learning_rate):
         change[1] = (abs(tmp[0] - theta[0]) + abs(tmp[1] + theta[1])) / 2
         theta[0] -= tmp[0]
         theta[1] -= tmp[1]
-    print(f'''Training successful.\n
-    Algorithm precision (less is better, 0 is best):"\n
-    - with default thetas [0, 0]:
-    \t{b.cost_function(n_mileage, n_price, m, [0, 0])}\n
-    - with trained thetas {theta}:
-    \t{b.cost_function(n_mileage, n_price, m, theta)}\n''')
+    print('Training successful.\n',\
+        '\nAlgorithm precision (less is better, 0 is best):\n',\
+        '\n- with default thetas [0, 0]:',\
+        f'\n\t{b.cost_function(n_mileage, n_price, m, [0, 0])}\n',\
+        f'\n- with trained thetas {theta}:',\
+        f'\n\t{b.cost_function(n_mileage, n_price, m, theta)}\n')
     return theta, sum(mileage)/m, sum(price)/m
 
 def process():
@@ -77,18 +77,18 @@ if __name__ == "__main__":
         process()
     except IOError as ex:
         print((type(ex).__name__))
-        print('''Couldn't find "data.csv" file to train the model.''')
-        print('''Make sure "data.csv" is in the same folder with your''')
-        print('''training program and you launch it from that folder''')
+        print('Couldn\'t find \"data.csv\" file to train the model.',\
+            '\nMake sure "data.csv" is in the same folder with your',\
+            'training program and you launch it from that folder')
     except (IndexError, ValueError) as ex:
-        print(f"Exception {type(ex).__name__} has occured with msg:\n{ex}\n")
-        print('''Double check that your "data.csv" file is correct''')
-        print("- First line is a header: km,price")
-        print("- All other lines are positive integers, two per line")
-        print("- No empty new lines at the end or just one")
-        print("- No other funky stuff. Just data, pure data")
+        print(f'Exception {type(ex).__name__} has occured with msg:\n{ex}\n',\
+            '\nDouble check that your \"data.csv\" file is correct.',\
+            '\n- first line is a header: km,price',\
+            '\n- all other lines are positive integers (two per line)',\
+            '\n- no empty new lines at the end or just one',\
+            '\n- no other funky stuff. Just data, pure data')
     except (ZeroDivisionError, StopIteration) as ex:
         print('''File "data.csv" must have at least three lines''')
     except AssertionError as ex:
-        print('''Incorrect header for "data.csv" file''')
-        print("Your file should have a header with two values, ex:\nkm,price")
+        print('Incorrect header for \"data.csv\" file.',\
+            'Your file should have a header with two values, ex:\nkm,price')
