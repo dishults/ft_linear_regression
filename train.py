@@ -4,44 +4,81 @@ Train model
 '''
 import csv
 
-import estimate as e
+from estimate import Price as estimate_price, dir_check
+
 import bonus as b
 
-def normalize_data(data, m):
-    '''through Feature Scaling (dividing by "max-min")
-    and Mean Normalization (substracting average)'''
-    normalized = [0] * m
-    average = sum(data) / m
-    max_minus_min = max(data) - min(data)
-    for i in range(m):
-        normalized[i] = (data[i] - average) / max_minus_min
-    return normalized
+class Data():
+    'All necessary data for model training'
+    def __init__(self):
+        self.m = 0 #lines number
+        self.mileage = Mileage()
+        self.price = Price()
+        self.theta = [0, 0]
+        self.learning_rate = 0.1
 
-def get_data(data):
-    'sort data'
-    mileage = []
-    price = []
-    for row in data:
-        mileage.append(int(row[0]))
-        price.append(int(row[1]))
-        if len(row) != 2:
-            raise IndexError('Too many columns')
-    m = data.line_num - 1
-    return mileage, price, m
+    def get_data(self, data_csv):
+        'sort data'
+        for row in data_csv:
+            self.mileage.mileage.append(int(row[0]))
+            self.price.price.append(int(row[1]))
+            if len(row) != 2:
+                raise IndexError('Too many columns')
+        self.m = data_csv.line_num - 1
 
-def train_model(mileage, price, m, learning_rate):
-    '''using a linear function with a gradient descent algorithm'''
-    theta = [0, 0]
+    def normalize(self):
+        'normalize data for easier model training'
+        self.mileage.normalize(self.m)
+        self.price.normalize(self.m)
+
+class Mileage():
+    'Mileage of a car in km'
+    def __init__(self):
+        self.mileage = []
+        self.normalized = []
+        self.average = 0
+        self.max_minus_min = 0
+
+    def normalize(self, m):
+        '''through Feature Scaling (dividing by "max-min")
+        and Mean Normalization (substracting average)'''
+        self.normalized = [0] * m
+        self.average = sum(self.mileage) / m
+        self.max_minus_min = max(self.mileage) - min(self.mileage)
+        for i in range(m):
+            self.normalized[i] = (self.mileage[i] - self.average) / self.max_minus_min
+
+class Price():
+    'Price for a given mileage'
+    def __init__(self):
+        self.price = []
+        self.normalized = []
+        self.average = 0
+        self.max_minus_min = 0
+        self.e = estimate_price()
+
+    def normalize(self, m):
+        '''through Feature Scaling (dividing by "max-min")
+        and Mean Normalization (substracting average)'''
+        self.normalized = [0] * m
+        self.average = sum(self.price) / m
+        self.max_minus_min = max(self.price) - min(self.price)
+        for i in range(m):
+            self.normalized[i] = (self.price[i] - self.average) / self.max_minus_min
+
+def train_model(data):
+    'using a linear function with a gradient descent algorithm'
+    mileage, price, theta, m = data.mileage, data.price, data.theta, data.m
+    learning_rate = data.learning_rate
     tmp = [0, 0]
-    n_mileage = normalize_data(mileage, m)
-    n_price = normalize_data(price, m)
     est = [[0] * m, [0] * m]
     change = [0, 1]
+    data.normalize()
     while change[0] != change[1]:
         change[0] = change[1]
         for i in range(m):
-            est[0][i] = e.estimate_price(n_mileage[i], theta) - n_price[i]
-            est[1][i] = est[0][i] * n_mileage[i]
+            est[0][i] = price.e.estimate(mileage.normalized[i], theta) - price.normalized[i]
+            est[1][i] = est[0][i] * mileage.normalized[i]
         tmp[0] = learning_rate * (sum(est[0])/m)
         tmp[1] = learning_rate * (sum(est[1])/m)
         change[1] = (abs(tmp[0] - theta[0]) + abs(tmp[1] + theta[1])) / 2
@@ -50,29 +87,29 @@ def train_model(mileage, price, m, learning_rate):
     print('Training successful.\n',\
         '\nAlgorithm precision (less is better, 0 is best):\n',\
         '\n- with default thetas [0, 0]:',\
-        f'\n\t{b.cost_function(n_mileage, n_price, m, [0, 0])}\n',\
+        f'\n\t{b.cost_function(mileage.normalized, price.normalized, m, [0, 0])}\n',\
         f'\n- with trained thetas {theta}:',\
-        f'\n\t{b.cost_function(n_mileage, n_price, m, theta)}\n')
-    return theta, sum(mileage)/m, sum(price)/m
+        f'\n\t{b.cost_function(mileage.normalized, price.normalized, m, theta)}\n')
 
 def process():
     'Read data file -> train model on it -> store the results'
     with open("data.csv") as file:
-        data = csv.reader(file)
-        header = next(data)
+        data_csv = csv.reader(file)
+        header = next(data_csv)
         assert len(header) == 2
         assert not any(cell.isdigit() for cell in header)
-        mileage, price, lines_nb = get_data(data)
-    theta, average_m, average_p = train_model(mileage, price, lines_nb, 0.1)
+        data = Data()
+        data.get_data(data_csv)
+    train_model(data)
     with open("results.csv", 'w+') as res:
         writer = csv.writer(res)
-        writer.writerow(theta)
-        writer.writerow([average_m, average_p])
-        writer.writerow([(max(mileage) - min(mileage)), (max(price) - min(price))])
-    b.plot(mileage, price, lines_nb)
+        writer.writerow(data.theta)
+        writer.writerow([data.mileage.average, data.price.average])
+        writer.writerow([data.mileage.max_minus_min, data.price.max_minus_min])
+    b.plot(data.theta, data.mileage, data.price, data.m)
 
 if __name__ == "__main__":
-    e.dir_check()
+    dir_check()
     try:
         process()
     except IOError as ex:
