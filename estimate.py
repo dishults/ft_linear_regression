@@ -6,9 +6,6 @@ import os
 import csv
 import sys
 
-MILEAGE = 0
-PRICE = 1
-
 class Mileage():
     'Mileage of a car in km'
     def __init__(self):
@@ -16,6 +13,9 @@ class Mileage():
         self.normalized = 0
         self.average = 0
         self.max_minus_min = 0
+
+    def __str__(self):
+        return f"\nFor mileage {self.to_check}"
 
     def get_mileage_to_check(self):
         'For what mileage should the price be estimated'
@@ -44,6 +44,9 @@ class Price():
         self.average = 0
         self.max_minus_min = 0
         self.estimated = 0
+    
+    def __str__(self):
+        return f"price estimate is: {self.estimated}"
 
     def estimate(self, mileage, theta):
         'estimate the price of a car for a given mileage'
@@ -72,13 +75,11 @@ def process(mileage, price):
             mileage.max_minus_min, price.max_minus_min = int(line[0]), int(line[1])
             mileage.normalize()
             price.normalize(mileage.normalized, theta)
-            price.estimated = price.denormalize()
+            price.estimated = int(price.denormalize())
     except IOError:
         theta = [0, 0]
-        price.estimated = price.estimate(mileage.to_check, theta)
-    if price.estimated < 0:
-        price.estimated = 0
-    return price.estimated
+        price.estimated = int(price.estimate(mileage.to_check, theta))
+    price.estimated = max(0, price.estimated) # if estimated is < 0 set it to 0
 
 def dir_check():
     '''Checks that you're trying to launch your program from
@@ -91,14 +92,15 @@ def dir_check():
 if __name__ == "__main__":
     dir_check()
     MILEAGE = Mileage()
+    PRICE = Price()
     if len(sys.argv) > 1:
         for arg in sys.argv:
             if not arg.isdigit():
                 continue
             MILEAGE.to_check = int(arg)
-            RESULT = int(process(MILEAGE, Price()))
-            print(f"\nFor mileage {MILEAGE.to_check} price estimate is: {RESULT}")
+            process(MILEAGE, PRICE)
+            print(MILEAGE, PRICE)
     else:
         MILEAGE.get_mileage_to_check()
-        RESULT = int(process(MILEAGE, Price()))
-        print("\nHere is your price estimate: ", RESULT)
+        process(MILEAGE, PRICE)
+        print(MILEAGE, PRICE)

@@ -10,12 +10,14 @@ import bonus as b
 
 class Data():
     'All necessary data for model training'
+
+    learning_rate = 0.1
+
     def __init__(self):
         self.m = 0 #lines number
         self.mileage = Mileage()
         self.price = Price()
         self.theta = [0, 0]
-        self.learning_rate = 0.1
 
     def get_data(self, data_csv):
         'sort data'
