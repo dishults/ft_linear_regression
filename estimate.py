@@ -6,7 +6,7 @@ import os
 import csv
 import sys
 
-class Mileage():
+class Mileage:
     'Mileage of a car in km'
     def __init__(self):
         self.to_check = 0
@@ -37,7 +37,7 @@ class Mileage():
         and Mean Normalization (substracting average)'''
         self.normalized = (self.to_check - self.average) / self.max_minus_min
 
-class Price():
+class Price:
     'Price for a given mileage'
     def __init__(self):
         self.normalized = 0

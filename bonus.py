@@ -3,13 +3,15 @@ Extras
 '''
 import matplotlib.pyplot as plt
 
-from estimate import Price
-
-def cost_function(mileage, price, m, theta):
+def cost_function(data, theta):
     'Program that calculates algorithm precision. Less is better, 0 is best'
+    mileage = data.mileage.normalized
+    price = data.price.normalized
+    estimate = data.price.e.estimate
+    m = data.m
     est = [0] * m
     for i in range(m):
-        est[i] = (Price.estimate(Price, mileage[i], theta) - price[i])**2
+        est[i] = (estimate(mileage[i], theta) - price[i])**2
     cost = sum(est)/(2 * m)
     return cost
 
@@ -25,3 +27,14 @@ def plot(theta, mileage, price, m):
     plt.plot(mileage.mileage, price_est, color='r', label='Trained model')
     plt.legend()
     plt.show()
+
+def show(data):
+    'Executes cost_function and plot after successful model training'
+    print('Training successful.\n',\
+        '\nAlgorithm precision (less is better, 0 is best):\n',\
+        '\n- with default thetas [0, 0]:',\
+        f'\n\t{cost_function(data, [0, 0])}\n',\
+        f'\n- with trained thetas {data.theta}:',\
+        f'\n\t{cost_function(data, data.theta)}\n')
+
+    plot(data.theta, data.mileage, data.price, data.m)
