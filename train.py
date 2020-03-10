@@ -4,19 +4,19 @@ Train model
 '''
 import csv
 
-from estimate import Price as estimate_price, dir_check
+from estimate import dir_check, price_estimate
 import bonus
 
-LEARNING_RATE = 0.1
+THETA = [0, 0]
 
 class Data:
     'All necessary data for model training'
 
     def __init__(self):
         self.m = 0  #number of lines
+        self.learning_rate = 0.1
         self.mileage = Mileage()
         self.price = Price()
-        self.theta = [0, 0]
 
     def get_data(self, data_csv):
         'sort data'
@@ -56,7 +56,6 @@ class Price:
         self.normalized = []
         self.average = 0
         self.max_minus_min = 0
-        self.e = estimate_price()
 
     def normalize(self, m):
         '''through Feature Scaling (dividing by "max-min")
@@ -69,7 +68,7 @@ class Price:
 
 def train_model(data):
     'using a linear function with a gradient descent algorithm'
-    mileage, price, theta, m = data.mileage, data.price, data.theta, data.m
+    mileage, price, learning_rate, m = data.mileage, data.price, data.learning_rate, data.m
     tmp = [0, 0]
     est = [[0] * m, [0] * m]
     change = [0, 1]
@@ -77,13 +76,13 @@ def train_model(data):
     while change[0] != change[1]:
         change[0] = change[1]
         for i in range(m):
-            est[0][i] = price.e.estimate(mileage.normalized[i], theta) - price.normalized[i]
+            est[0][i] = price_estimate(mileage.normalized[i], THETA) - price.normalized[i]
             est[1][i] = est[0][i] * mileage.normalized[i]
-        tmp[0] = LEARNING_RATE * (sum(est[0])/m)
-        tmp[1] = LEARNING_RATE * (sum(est[1])/m)
-        change[1] = (abs(tmp[0] - theta[0]) + abs(tmp[1] + theta[1])) / 2
-        theta[0] -= tmp[0]
-        theta[1] -= tmp[1]
+        tmp[0] = learning_rate * (sum(est[0])/m)
+        tmp[1] = learning_rate * (sum(est[1])/m)
+        change[1] = (abs(tmp[0] - THETA[0]) + abs(tmp[1] + THETA[1])) / 2
+        THETA[0] -= tmp[0]
+        THETA[1] -= tmp[1]
 
 def process():
     'Read data file -> train model on it -> store the results'
@@ -95,12 +94,12 @@ def process():
         data = Data()
         data.get_data(data_csv)
     train_model(data)
-    with open("results.csv", 'w+') as res:
+    with open("results.csv", 'w') as res:
         writer = csv.writer(res)
-        writer.writerow(data.theta)
+        writer.writerow(THETA)
         writer.writerow([data.mileage.average, data.price.average])
         writer.writerow([data.mileage.max_minus_min, data.price.max_minus_min])
-    bonus.show(data)
+    bonus.show(data, THETA)
 
 if __name__ == "__main__":
     dir_check()

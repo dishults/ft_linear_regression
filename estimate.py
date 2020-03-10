@@ -44,23 +44,22 @@ class Price:
         self.average = 0
         self.max_minus_min = 0
         self.estimated = 0
-    
+
     def __str__(self):
         return f"price estimate is: {self.estimated}"
 
-    def estimate(self, mileage, theta):
-        'estimate the price of a car for a given mileage'
-        return theta[0] + (theta[1] * mileage)
-    
     def normalize(self, mileage_normalized, theta):
         '''through Feature Scaling (dividing by "max-min")
         and Mean Normalization (substracting average)'''
-        self.normalized = self.estimate((mileage_normalized), theta)
-    
+        self.normalized = price_estimate((mileage_normalized), theta)
+
     def denormalize(self):
         'to a real value'
         return self.max_minus_min * self.normalized + self.average
 
+def price_estimate(mileage, theta):
+    'estimate the price of a car for a given mileage'
+    return theta[0] + (theta[1] * mileage)
 
 def process(mileage, price):
     'estimate the price with trained or default thetas'
@@ -78,7 +77,7 @@ def process(mileage, price):
             price.estimated = int(price.denormalize())
     except IOError:
         theta = [0, 0]
-        price.estimated = int(price.estimate(mileage.to_check, theta))
+        price.estimated = int(price_estimate(mileage.to_check, theta))
     price.estimated = max(0, price.estimated) # if estimated is < 0 set it to 0
 
 def dir_check():
