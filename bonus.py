@@ -14,7 +14,7 @@ def cost_function(data, theta):
     cost = sum(est)/(2 * m)
     return cost
 
-def plot(theta, mileage, price, m):
+def plot(theta, mileage, price):
     'Plot data on the graph'
     plt.scatter(mileage.mileage, price.price, label='Original data')
     plt.xlabel('Mileage')
@@ -33,4 +33,4 @@ def show(data, theta):
         f'\n\t{cost_function(data, [0, 0])}\n',\
         f'\n- with trained thetas {theta}:',\
         f'\n\t{cost_function(data, theta)}\n')
-    plot(theta, data.mileage, data.price, data.m)
+    plot(theta, data.mileage, data.price)
