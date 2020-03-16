@@ -14,7 +14,6 @@ class Data:
 
     def __init__(self):
         self.m = 0  #number of lines
-        self.learning_rate = 0.1
         self.mileage = Mileage()
         self.price = Price()
 
@@ -43,11 +42,9 @@ class Mileage:
     def normalize(self, m):
         '''through Feature Scaling (dividing by "max-min")
         and Mean Normalization (substracting average)'''
-        self.normalized = [0] * m
         self.average = sum(self.mileage) / m
         self.max_minus_min = max(self.mileage) - min(self.mileage)
-        for i in range(m):
-            self.normalized[i] = (self.mileage[i] - self.average) / self.max_minus_min
+        self.normalized = [(km - self.average) / self.max_minus_min for km in self.mileage]
 
 class Price:
     'Price for a given mileage'
@@ -60,15 +57,13 @@ class Price:
     def normalize(self, m):
         '''through Feature Scaling (dividing by "max-min")
         and Mean Normalization (substracting average)'''
-        self.normalized = [0] * m
         self.average = sum(self.price) / m
         self.max_minus_min = max(self.price) - min(self.price)
-        for i in range(m):
-            self.normalized[i] = (self.price[i] - self.average) / self.max_minus_min
+        self.normalized = [(price - self.average) / self.max_minus_min for price in self.price]
 
-def train_model(data):
+def train_model(data, learning_rate=0.1):
     'using a linear function with a gradient descent algorithm'
-    mileage, price, learning_rate, m = data.mileage, data.price, data.learning_rate, data.m
+    mileage, price, m = data.mileage, data.price, data.m
     tmp = [0, 0]
     est = [[0] * m, [0] * m]
     change = [0, 1]

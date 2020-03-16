@@ -10,9 +10,7 @@ def cost_function(data, theta):
     mileage = data.mileage.normalized
     price = data.price.normalized
     m = data.m
-    est = [0] * m
-    for i in range(m):
-        est[i] = (price_estimate(mileage[i], theta) - price[i])**2
+    est = [(price_estimate(mileage, theta) - price)**2 for mileage, price in zip(mileage, price)]
     cost = sum(est)/(2 * m)
     return cost
 
@@ -21,10 +19,8 @@ def plot(theta, mileage, price, m):
     plt.scatter(mileage.mileage, price.price, label='Original data')
     plt.xlabel('Mileage')
     plt.ylabel('Price')
-    price_est = [0] * m
-    for i in range(m):
-        price.normalized[i] = price_estimate(mileage.normalized[i], theta)
-        price_est[i] = int(price.max_minus_min * price.normalized[i] + price.average)
+    price.normalized = [price_estimate(n_mileage, theta) for n_mileage in mileage.normalized]
+    price_est = [price.max_minus_min * n_price + price.average for n_price in price.normalized]
     plt.plot(mileage.mileage, price_est, color='r', label='Trained model')
     plt.legend()
     plt.show()
