@@ -102,18 +102,18 @@ if __name__ == "__main__":
         process()
     except IOError as ex:
         print((type(ex).__name__))
-        print('Couldn\'t find \"data.csv\" file to train the model.',\
-            '\nMake sure "data.csv" is in the same folder with your',\
-            'training program and you launch it from that folder')
+        print('Couldn\'t find \"data.csv\" file to train the model.'
+              '\nMake sure "data.csv" is in the same folder with your'
+              'training program and you launch it from that folder')
     except (IndexError, ValueError) as ex:
-        print(f'Exception {type(ex).__name__} has occured with msg:\n{ex}\n',\
-            '\nDouble check that your \"data.csv\" file is correct.',\
-            '\n- first line is a header: km,price',\
-            '\n- all other lines are positive integers (two per line)',\
-            '\n- no empty new lines at the end or just one',\
-            '\n- no other funky stuff. Just data, pure data')
+        print(f'Exception {type(ex).__name__} has occured with msg:\n{ex}\n'
+              '\nDouble check that your \"data.csv\" file is correct.'
+              '\n- first line is a header: km,price'
+              '\n- all other lines are positive integers (two per line)'
+              '\n- no empty new lines at the end or just one'
+              '\n- no other funky stuff. Just data, pure data')
     except (ZeroDivisionError, StopIteration) as ex:
         print('''File "data.csv" must have at least three lines''')
     except AssertionError as ex:
-        print('Incorrect header for \"data.csv\" file.',\
-            'Your file should have a header with two values, ex:\nkm,price')
+        print('Incorrect header for \"data.csv\" file.\n'
+              'Your file should have a header with two values, ex:\n\tkm,price')

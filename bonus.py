@@ -27,10 +27,10 @@ def plot(theta, mileage, price):
 
 def show(data, theta):
     'Executes cost_function and plot after successful model training'
-    print('Training successful.\n',\
-        '\nAlgorithm precision (less is better, 0 is best):\n',\
-        '\n- with default thetas [0, 0]:',\
-        f'\n\t{cost_function(data, [0, 0])}\n',\
-        f'\n- with trained thetas {theta}:',\
-        f'\n\t{cost_function(data, theta)}\n')
+    print('Training successful.\n'
+          '\nAlgorithm precision (less is better, 0 is best):\n'
+          '\n- with default thetas [0, 0]:'
+          f'\n\t{cost_function(data, [0, 0])}\n'
+          f'\n- with trained thetas {theta}:'
+          f'\n\t{cost_function(data, theta)}\n')
     plot(theta, data.mileage, data.price)
