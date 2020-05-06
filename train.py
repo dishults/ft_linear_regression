@@ -1,105 +1,107 @@
 #!/usr/bin/env python3
-'''
+"""
 Train model
-'''
+"""
+
 import csv
 
-from estimate import dir_check, price_estimate
+from estimate import dir_check
+from estimate import Price as p
 import bonus
 
-THETA = [0, 0]
-
-class Data:
-    'All necessary data for model training'
-
-    def __init__(self):
-        self.m = 0  #number of lines
-        self.mileage = Mileage()
-        self.price = Price()
-
-    def get_data(self, data_csv):
-        'sort data'
-        for row in data_csv:
-            self.mileage.mileage.append(int(row[0]))
-            self.price.price.append(int(row[1]))
-            if len(row) != 2:
-                raise IndexError('Too many columns')
-        self.m = data_csv.line_num - 1
-
-    def normalize(self):
-        'normalize data for easier model training'
-        self.mileage.normalize(self.m)
-        self.price.normalize(self.m)
-
 class Mileage:
-    'Mileage of a car in km'
-    def __init__(self):
-        self.mileage = []
-        self.normalized = []
-        self.average = 0
-        self.max_minus_min = 0
+    """Mileage of a car in km."""
 
-    def normalize(self, m):
-        '''through Feature Scaling (dividing by "max-min")
-        and Mean Normalization (substracting average)'''
-        self.average = sum(self.mileage) / m
-        self.max_minus_min = max(self.mileage) - min(self.mileage)
-        self.normalized = [(km - self.average) / self.max_minus_min for km in self.mileage]
+    mileage = []
+    normalized = []
+    average = 0
+    range_ = 0
+
+    @classmethod
+    def normalize(cls):
+        """Normalize through Feature Scaling (dividing by "max-min")
+        and Mean Normalization (substracting average).
+        """
+
+        cls.average = sum(cls.mileage) / Data.m
+        cls.range_ = max(cls.mileage) - min(cls.mileage)
+        cls.normalized = [(km - cls.average) / cls.range_ for km in cls.mileage]
 
 class Price:
-    'Price for a given mileage'
-    def __init__(self):
-        self.price = []
-        self.normalized = []
-        self.average = 0
-        self.max_minus_min = 0
+    """Price for a given mileage."""
 
-    def normalize(self, m):
-        '''through Feature Scaling (dividing by "max-min")
-        and Mean Normalization (substracting average)'''
-        self.average = sum(self.price) / m
-        self.max_minus_min = max(self.price) - min(self.price)
-        self.normalized = [(price - self.average) / self.max_minus_min for price in self.price]
+    price = []
+    normalized = []
+    average = 0
+    range_ = 0
 
-def train_model(data, learning_rate=0.1):
-    'using a linear function with a gradient descent algorithm'
-    mileage, price, m = data.mileage, data.price, data.m
-    tmp = [0, 0]
-    est = [[0] * m, [0] * m]
-    change = [0, 1]
-    data.normalize()
-    while change[0] != change[1]:
-        change[0] = change[1]
-        for i in range(m):
-            est[0][i] = price_estimate(mileage.normalized[i], THETA) - price.normalized[i]
-            est[1][i] = est[0][i] * mileage.normalized[i]
-        tmp[0] = learning_rate * (sum(est[0])/m)
-        tmp[1] = learning_rate * (sum(est[1])/m)
-        change[1] = (abs(tmp[0] - THETA[0]) + abs(tmp[1] + THETA[1])) / 2
-        THETA[0] -= tmp[0]
-        THETA[1] -= tmp[1]
+    @classmethod
+    def normalize(cls):
+        """Normalize through Feature Scaling (dividing by "max-min")
+        and Mean Normalization (substracting average).
+        """
 
-def process():
-    'Read data file -> train model on it -> store the results'
-    with open("data.csv") as file:
-        data_csv = csv.reader(file)
-        header = next(data_csv)
-        assert len(header) == 2
-        assert not any(cell.isdigit() for cell in header)
-        data = Data()
-        data.get_data(data_csv)
-    train_model(data)
-    with open("results.csv", 'w') as res:
-        writer = csv.writer(res)
-        writer.writerow(THETA)
-        writer.writerow([data.mileage.average, data.price.average])
-        writer.writerow([data.mileage.max_minus_min, data.price.max_minus_min])
-    bonus.show(data, THETA)
+        cls.average = sum(cls.price) / Data.m
+        cls.range_ = max(cls.price) - min(cls.price)
+        cls.normalized = [(price - cls.average) / cls.range_ for price in cls.price]
 
-if __name__ == "__main__":
+class Data:
+    """All necessary data for model training."""
+
+    m = 0  # Number of lines
+    theta = [0, 0]
+
+    @classmethod
+    def get_data(cls, data_csv):
+        """Sort csv data into Mileage and Price and normalize them."""
+
+        for mileage, price in data_csv:
+            Mileage.mileage.append(int(mileage))
+            Price.price.append(int(price))            
+        cls.m = data_csv.line_num - 1
+        Mileage.normalize(), Price.normalize()
+
+    @classmethod
+    def train_model(cls, learning_rate=0.1):
+        """Train model using linear function with gradient descent algorithm."""
+
+        tmp = [0, 0]
+        est = [[0] * cls.m, [0] * cls.m]
+        change = [0, 1]
+
+        while change[0] != change[1]:
+            change[0] = change[1]
+            for i in range(cls.m):
+                est[0][i] = p.estimate(Mileage.normalized[i], cls.theta) - Price.normalized[i]
+                est[1][i] = est[0][i] * Mileage.normalized[i]
+            tmp[0] = learning_rate * (sum(est[0])/cls.m)
+            tmp[1] = learning_rate * (sum(est[1])/cls.m)
+            change[1] = (abs(tmp[0] - cls.theta[0]) + abs(tmp[1] + cls.theta[1])) / 2
+            cls.theta[0] -= tmp[0]
+            cls.theta[1] -= tmp[1]
+
+    @classmethod
+    def process(cls):
+        """Read data file -> train model on it -> store the results."""
+
+        with open("data.csv") as file:
+            data_csv = csv.reader(file)
+            header = next(data_csv)
+            assert len(header) == 2
+            assert not any(cell.isdigit() for cell in header)
+            cls.get_data(data_csv)
+        cls.train_model()
+        with open("results.csv", 'w') as res:
+            writer = csv.writer(res)
+            writer.writerow(cls.theta)
+            writer.writerow([Mileage.average, Price.average])
+            writer.writerow([Mileage.range_, Price.range_])
+
+def main():
     dir_check()
     try:
-        process()
+        Data.process()
+        bonus.show(Mileage, Price, Data)
     except IOError as ex:
         print((type(ex).__name__))
         print('Couldn\'t find \"data.csv\" file to train the model.'
@@ -117,3 +119,6 @@ if __name__ == "__main__":
     except AssertionError as ex:
         print('Incorrect header for \"data.csv\" file.\n'
               'Your file should have a header with two values, ex:\n\tkm,price')
+
+if __name__ == "__main__":
+    main()
