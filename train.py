@@ -65,17 +65,17 @@ class Data:
     def train_model(cls, learning_rate=0.1):
         """Train model using linear function with gradient descent algorithm."""
 
-        tmp = [0, 0]
-        est = [[0] * cls.m, [0] * cls.m]
-        change = [0, 1]
+        tmp = {}
+        est0, est1 = {}, {}
+        change = {0 : 0, 1 : 1}
 
         while change[0] != change[1]:
             change[0] = change[1]
             for i in range(cls.m):
-                est[0][i] = p.estimate(Mileage.normalized[i], cls.theta) - Price.normalized[i]
-                est[1][i] = est[0][i] * Mileage.normalized[i]
-            tmp[0] = learning_rate * (sum(est[0])/cls.m)
-            tmp[1] = learning_rate * (sum(est[1])/cls.m)
+                est0[i] = p.estimate(Mileage.normalized[i], cls.theta) - Price.normalized[i]
+                est1[i] = est0[i] * Mileage.normalized[i]
+            tmp[0] = learning_rate * (sum(est0.values())/cls.m)
+            tmp[1] = learning_rate * (sum(est1.values())/cls.m)
             change[1] = (abs(tmp[0] - cls.theta[0]) + abs(tmp[1] + cls.theta[1])) / 2
             cls.theta[0] -= tmp[0]
             cls.theta[1] -= tmp[1]
